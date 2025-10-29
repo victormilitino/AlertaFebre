@@ -1,29 +1,40 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom'; 
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
 import Formulario from './Formulario';
 import Registros from '../pages/Registros';
-import EditarRegistro from '../pages/EditarRegistro'; // Importar o componente de edição
+import EditarRegistro from '../pages/EditarRegistro';
+
+
+const CHAVE_STORAGE = 'alerta-febre-registros';
 
 function App() {
-  const [registros, setRegistros] = useState([]);
+  const [registros, setRegistros] = useState(() => {
+    const dadosSalvos = localStorage.getItem(CHAVE_STORAGE);
+
+    if (dadosSalvos) {
+      return JSON.parse(dadosSalvos);
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(registros));
+  }, [registros]);
+
 
   const handleAdicionarRegistro = (novoRegistro) => {
     setRegistros((registrosAnteriores) => [...registrosAnteriores, novoRegistro]);
   };
 
   const handleDeletarRegistro = (id) => {
-
-    setRegistros((registrosAnteriores) => 
+    setRegistros((registrosAnteriores) =>
       registrosAnteriores.filter(reg => reg.id !== id)
     );
     alert('Registro deletado com sucesso!');
   };
-
-
+  
   const handleAtualizarRegistro = (registroAtualizado) => {
     setRegistros((registrosAnteriores) =>
       registrosAnteriores.map(reg =>
@@ -41,23 +52,25 @@ function App() {
         <p className='fraseEfeito'>Saúde acompanhada com carinho.</p>
 
         <Routes>
-          <Route 
-            path="/" 
-            element={<Formulario onAdicionarRegistro={handleAdicionarRegistro} />} 
+          <Route
+            path="/"
+            element={<Formulario onAdicionarRegistro={handleAdicionarRegistro} />}
           />
-          <Route 
-            path="/registros" 
+
+          <Route
+            path="/registros"
             element={
-              <Registros 
-                registros={registros} 
+              <Registros
+                registros={registros}
                 onDeletar={handleDeletarRegistro}
               />
-            } 
+            }
           />
-          <Route 
+
+          <Route
             path="/editar/:id"
             element={
-              <EditarRegistro 
+              <EditarRegistro
                 registros={registros}
                 onAtualizar={handleAtualizarRegistro}
               />
